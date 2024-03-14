@@ -1,0 +1,39 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "sonar_dummy_python_oss"
+version = "0.0.1"
+authors = [
+  "Jayadeep Kinavoor Madam <jayadeep.kinavoormadam@sonarsource.com>",
+]
+description = "A sample python project used for testing purposes"
+readme = "README.md"
+license = "LGPL-3.0-only"
+keywords = [
+  "sonar",
+  "sonar-dummy"
+]
+classifiers = [
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Quality Assurance",
+]
+packages = [{ include = "sonar_dummy_python_oss", from = "src" }]
+
+[tool.poetry.dependencies]
+python = ">=3.8"
+
+[project.urls]
+Homepage = "https://github.com/SonarSource/ssonar-dummy-python-oss"
+Repository = "https://github.com/SonarSource/sonar-dummy-python-oss"
