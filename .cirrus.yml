@@ -1,0 +1,56 @@
+artifactory_build: &artifactory_build
+  ARTIFACTORY_DEPLOY_USERNAME: VAULT[development/artifactory/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-qa-deployer username]
+  ARTIFACTORY_DEPLOY_PASSWORD: VAULT[development/artifactory/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-qa-deployer access_token]
+
+artifactory_private: &artifactory_private
+  ARTIFACTORY_PRIVATE_USERNAME: VAULT[development/artifactory/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-private-reader username]
+  ARTIFACTORY_PRIVATE_PASSWORD: VAULT[development/artifactory/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-private-reader access_token]
+
+container_definition: &CONTAINER_DEFINITION
+  dockerfile: .cirrus/poetry.Dockerfile
+  cluster_name: ${CIRRUS_CLUSTER_NAME}
+  region: eu-central-1
+  namespace: default
+  builder_image_name: POETRY_VM
+  builder_role: cirrus-builder
+  builder_image: docker-builder-v*
+  builder_instance_type: t3.small
+  builder_subnet_id: ${CIRRUS_AWS_SUBNET}
+  
+only_sonarsource_qa: &ONLY_SONARSOURCE_QA
+  only_if: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_TAG == "" && ($CIRRUS_PR != "" || $CIRRUS_BRANCH == "master")
+
+env:
+  CIRRUS_SHELL: bash
+  ARTIFACTORY_URL: VAULT[development/kv/data/repox data.url]
+  ARTIFACTORY_DEPLOY_REPO: sonarsource-pypi-public-qa
+
+
+build_task:
+  eks_container:
+    <<: *CONTAINER_DEFINITION
+    cpu: 2
+    memory: 2G
+  env:
+    <<: *artifactory_build
+  build_script:
+    - poetry install
+    - poetry version $(poetry version -s).${CI_BUILD_NUMBER}
+    - poetry build
+    - poetry config repositories.sonarsource https://repox.jfrog.io/artifactory/api/pypi/${ARTIFACTORY_DEPLOY_REPO}
+    - poetry publish -r sonarsource --username ${ARTIFACTORY_DEPLOY_USERNAME} --password ${ARTIFACTORY_DEPLOY_PASSWORD} --verbose
+
+promote_task:
+  <<: *ONLY_SONARSOURCE_QA
+  eks_container:
+    <<: *CONTAINER_DEFINITION
+    cpu: 2
+    memory: 2G
+  env:
+    ARTIFACTORY_PROMOTE_ACCESS_TOKEN: VAULT[development/artifactory/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-promoter access_token]
+  promote_script:
+    # Temporary hack script until https://sonarsource.atlassian.net/browse/BUILD-4592 is completed
+    # Artifact is copied to sonarsource-pypi-public-builds repo for testing the release workflow as part of https://sonarsource.atlassian.net/browse/BUILD-4501
+    - export VERSION=$(poetry version -s).$CI_BUILD_NUMBER
+    - jfrog config add repox --artifactory-url "$ARTIFACTORY_URL" --access-token "$ARTIFACTORY_PROMOTE_ACCESS_TOKEN"
+    - jfrog rt cp sonarsource-pypi-public-qa/sonar_dummy_python_oss/$VERSION/ sonarsource-pypi-public-builds/sonar_dummy_python_oss/$VERSION/
