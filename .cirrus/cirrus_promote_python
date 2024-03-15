@@ -7,9 +7,6 @@ set -euo pipefail
 : "${CIRRUS_BRANCH?}" "${CIRRUS_DEFAULT_BRANCH?}" "${CI_BUILD_NUMBER?}" "${CIRRUS_REPO_NAME?}"
 
 echo ">> Promote Python build"
-set +o verbose
-source cirrus-env PROMOTE
-set -o verbose
 jfrog config remove repox
 cirrus_jfrog_promote
 

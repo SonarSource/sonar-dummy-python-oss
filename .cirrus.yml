@@ -55,5 +55,5 @@ promote_task:
     ARTIFACTS: sonar-summy-python-oss
   <<: *POETRY_TEMPLATE
   promote_script:
-   - source .cirrus/cirrus-env PROMOTE
+   - source .cirrus/cirrus_env PROMOTE
    - .cirrus/cirrus_promote_python
