@@ -1,0 +1,32 @@
+#!/bin/bash
+# Regular way to build a SonarSource Poetry project.
+# - ARTIFACTORY_DEPLOY_REPO: deployment repository (sonarsource-pypi-public-qa or sonarsource-pypi-private-qa)
+# shellcheck source=/dev/null
+
+set -euo pipefail
+
+: "${ARTIFACTORY_URL?}" "${ARTIFACTORY_DEPLOY_REPO?}" "${ARTIFACTORY_DEPLOY_ACCESS_TOKEN?}"
+: "${CIRRUS_BRANCH?}" "${CIRRUS_DEFAULT_BRANCH?}" "${CI_BUILD_NUMBER?}" "${CIRRUS_REPO_NAME?}"
+
+function jfrog_poetry_publish() {
+  jfrog config remove repox
+  jfrog config add repox --artifactory-url "$ARTIFACTORY_URL" --access-token "$ARTIFACTORY_DEPLOY_ACCESS_TOKEN"
+  project_name=$(poetry version | awk {'print $1'})
+  pushd dist
+  jfrog rt upload ./ "$ARTIFACTORY_DEPLOY_REPO/$project_name/$PROJECT_VERSION/" --module="$project_name:$PROJECT_VERSION" \
+    --build-name="$CIRRUS_REPO_NAME" --build-number="$CI_BUILD_NUMBER"
+  popd
+  jfrog rt build-collect-env "$CIRRUS_REPO_NAME" "$CI_BUILD_NUMBER"
+  jfrog rt build-publish "$CIRRUS_REPO_NAME" "$CI_BUILD_NUMBER" \
+    --env-include 'PROJECT;GIT_*;*VERSION*;BUILD_*;GITHUB_*;CIRRUS_*;*BRANCH*;*ID' \
+    --env-exclude "*login*;*pass*;*psw*;*pwd*;*secret*;*key*;*token*;*auth*"
+}
+
+poetry build
+if [[ -n "${CIRRUS_PR:-}" ]]; then
+  if [ "${DEPLOY_PULL_REQUEST:-}" == "true" ]; then
+    jfrog_poetry_publish
+  fi
+elif [[ "$CIRRUS_BRANCH" = "$CIRRUS_DEFAULT_BRANCH" || "$CIRRUS_BRANCH" =~ ^"branch-" || "$CIRRUS_BRANCH" =~ ^"dogfood-on-" ]]; then
+  jfrog_poetry_publish
+fi

@@ -1,0 +1,20 @@
+#!/bin/bash
+# JFrog promotion, notify GitHub and Burgr
+# shellcheck source=/dev/null
+
+set -euo pipefail
+
+: "${CIRRUS_BRANCH?}" "${CIRRUS_DEFAULT_BRANCH?}" "${CI_BUILD_NUMBER?}" "${CIRRUS_REPO_NAME?}"
+
+echo ">> Promote Python build"
+set +o verbose
+source cirrus-env PROMOTE
+set -o verbose
+jfrog config remove repox
+cirrus_jfrog_promote
+
+if [[ -v GITHUB_TOKEN ]]; then
+  github-notify-promotion
+else
+  echo "GITHUB_TOKEN unset: skipping build number commit status on GitHub"
+fi
