@@ -54,4 +54,6 @@ promote_task:
     GITHUB_TOKEN: VAULT[development/github/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-promotion token]
     ARTIFACTS: sonar-summy-python-oss
   <<: *POETRY_TEMPLATE
-  promote_script: .cirrus/cirrus_promote_python
+  promote_script:
+   - source .cirrus/cirrus-env PROMOTE
+   - .cirrus/cirrus_promote_python
