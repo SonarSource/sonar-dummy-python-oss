@@ -16,7 +16,7 @@ jobs:
     permissions:
       id-token: write
       contents: write
-    uses: SonarSource/gh-action_release/.github/workflows/main.yaml@v5
+    uses: SonarSource/gh-action_release/.github/workflows/main.yaml@feat/jd/BUILD-4567-release-workflow-fix
     with:
       publishToPyPI: true
       publishToTestPyPI: true
