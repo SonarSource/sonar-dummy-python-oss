@@ -6,7 +6,6 @@ on:
   release:
     types:
       - published
-  workflow_dispatch:
 
 env:
   PYTHONUNBUFFERED: 1
@@ -16,7 +15,7 @@ jobs:
     permissions:
       id-token: write
       contents: write
-    uses: SonarSource/gh-action_release/.github/workflows/main.yaml@feat/jd/BUILD-4567-release-workflow-fix
+    uses: SonarSource/gh-action_release/.github/workflows/main.yaml@master
     with:
       publishToPyPI: true
       publishToTestPyPI: true

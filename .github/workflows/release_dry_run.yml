@@ -3,9 +3,6 @@ name: sonar-release (dry run)
 # This workflow is triggered when publishing a new GitHub release
 # yamllint disable-line rule:truthy
 on:
-  release:
-    types:
-      - published
   workflow_dispatch:
 
 env:
