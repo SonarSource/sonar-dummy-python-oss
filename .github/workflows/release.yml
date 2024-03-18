@@ -15,7 +15,8 @@ jobs:
     permissions:
       id-token: write
       contents: write
-    uses: SonarSource/gh-action_release/.github/workflows/main.yaml@master
+    uses: SonarSource/gh-action_release/.github/workflows/main.yaml@feat/jd/BUILD-4665-python-releasability
     with:
       publishToPyPI: true
       publishToTestPyPI: true
+      skipPythonReleasabilityChecks: true
