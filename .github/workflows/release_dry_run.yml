@@ -1,6 +1,6 @@
 ---
-name: sonar-release
-# This workflow is triggered when publishing a new github release
+name: sonar-release (dry run)
+# This workflow is triggered when publishing a new GitHub release
 # yamllint disable-line rule:truthy
 on:
   release:
@@ -16,7 +16,7 @@ jobs:
     permissions:
       id-token: write
       contents: write
-    uses: SonarSource/gh-action_release/.github/workflows/main.yaml@feat/jd/BUILD-4567-release-workflow-fix
+    uses: SonarSource/gh-action_release/.github/workflows/main.yaml@master
     with:
       dryRun: true
       publishToPyPI: true
