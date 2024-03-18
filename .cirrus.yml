@@ -5,25 +5,26 @@ env:
   ARTIFACTORY_DEPLOY_USERNAME: VAULT[development/artifactory/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-qa-deployer username]
   ARTIFACTORY_DEPLOY_ACCESS_TOKEN: VAULT[development/artifactory/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-qa-deployer access_token]
   DEPLOY_PULL_REQUEST: 'true'
+  POETRY_VIRTUALENVS_PATH: ".cache/poetry/venvs"
+  POETRY_CACHE_DIR: ".cache/poetry/pypoetry"
+
+only_if: $CIRRUS_USER_COLLABORATOR == "true" && $CIRRUS_TAG == "" && ($CIRRUS_PR != "" || $CIRRUS_BRANCH == $CIRRUS_DEFAULT_BRANCH || $CIRRUS_BRANCH =~ "feature/*" || $CIRRUS_BRANCH =~ "dogfood-on-.*")
 
 container_definition: &CONTAINER_DEFINITION
   dockerfile: .cirrus/poetry.Dockerfile
   cluster_name: ${CIRRUS_CLUSTER_NAME}
   region: eu-central-1
   namespace: default
-  builder_image_name: POETRY_VM
+  builder_subnet_ids: ${CIRRUS_AWS_SUBNETS}
   builder_role: cirrus-builder
   builder_image: docker-builder-v*
   builder_instance_type: t3.small
-  builder_subnet_ids: ${CIRRUS_AWS_SUBNETS}
   use_in_memory_disk: true
   docker_arguments:
     CIRRUS_AWS_ACCOUNT: ${CIRRUS_AWS_ACCOUNT}
-  cpu: 3
-  memory: 8G
+  cpu: 1
+  memory: 1G
   
-only_if: $CIRRUS_USER_COLLABORATOR == "true" && $CIRRUS_TAG == "" && ($CIRRUS_PR != "" || $CIRRUS_BRANCH == $CIRRUS_DEFAULT_BRANCH || $CIRRUS_BRANCH =~ "feature/*" || $CIRRUS_BRANCH =~ "dogfood-on-.*")
-
 poetry_cache_template: &POETRY_CACHE
   poetry_cache:
     folder: .cache/poetry/
@@ -44,7 +45,7 @@ build_task:
   <<: *POETRY_TEMPLATE
   alias: build
   name: "Build"
-  build_script: .cirrus/poetry_build_publish
+  build_script: .cirrus/regular_poetry_build_publish
 
 promote_task:
   depends_on:
@@ -52,8 +53,9 @@ promote_task:
   env:
     ARTIFACTORY_PROMOTE_ACCESS_TOKEN: VAULT[development/artifactory/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-promoter access_token]
     GITHUB_TOKEN: VAULT[development/github/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-promotion token]
-    ARTIFACTS: sonar-summy-python-oss
+    BURGR_URL: VAULT[development/kv/data/burgr data.url]
+    BURGR_USERNAME: VAULT[development/kv/data/burgr data.cirrus_username]
+    BURGR_PASSWORD: VAULT[development/kv/data/burgr data.cirrus_password]
+    ARTIFACTS: :sonar_dummy_python_oss:tar.gz,:sonar_dummy_python_oss:whl:py3-none-any
   <<: *POETRY_TEMPLATE
-  promote_script:
-   - source .cirrus/cirrus_env PROMOTE
-   - .cirrus/cirrus_promote_python
+  promote_script: .cirrus/cirrus_promote

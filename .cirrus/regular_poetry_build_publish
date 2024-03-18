@@ -2,7 +2,6 @@
 # Regular way to build a SonarSource Poetry project.
 # - ARTIFACTORY_DEPLOY_REPO: deployment repository (sonarsource-pypi-public-qa or sonarsource-pypi-private-qa)
 # shellcheck source=/dev/null
-
 set -euo pipefail
 
 : "${ARTIFACTORY_URL?}" "${ARTIFACTORY_DEPLOY_REPO?}" "${ARTIFACTORY_DEPLOY_ACCESS_TOKEN?}"
@@ -11,7 +10,7 @@ set -euo pipefail
 function jfrog_poetry_publish() {
   jfrog config remove repox
   jfrog config add repox --artifactory-url "$ARTIFACTORY_URL" --access-token "$ARTIFACTORY_DEPLOY_ACCESS_TOKEN"
-  project_name=$(poetry version | awk {'print $1'})
+  project_name=$(poetry version | awk '{print $1}')
   pushd dist
   jfrog rt upload ./ "$ARTIFACTORY_DEPLOY_REPO/$project_name/$PROJECT_VERSION/" --module="$project_name:$PROJECT_VERSION" \
     --build-name="$CIRRUS_REPO_NAME" --build-number="$CI_BUILD_NUMBER"

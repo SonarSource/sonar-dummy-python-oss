@@ -1,5 +1,5 @@
 ARG CIRRUS_AWS_ACCOUNT=275878209202
-FROM ${CIRRUS_AWS_ACCOUNT}.dkr.ecr.eu-central-1.amazonaws.com/base:j17-latest
+FROM ${CIRRUS_AWS_ACCOUNT}.dkr.ecr.eu-central-1.amazonaws.com/base:j21-latest
 
 USER root
 
@@ -17,6 +17,8 @@ RUN cd /usr/local/bin \
     && ln -s pip${PYTHON_VERSION%.*} pip \
     && ln -s pip${PYTHON_VERSION%.*} pip3
 
+USER sonarsource
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
-ENV PATH=/root/.local/bin:$PATH
+ENV PATH="/home/sonarsource/bin:${PATH}"
+ENV PATH="${PATH}:/home/sonarsource/.local/bin"
