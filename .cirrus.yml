@@ -33,7 +33,7 @@ poetry_cache_template: &POETRY_CACHE
     <<: *CONTAINER_DEFINITION
   <<: *POETRY_CACHE
   poetry_install_script:
-    - source .cirrus/set_poetry_build_version "$CI_BUILD_NUMBER"
+    - source set_poetry_build_version "$CI_BUILD_NUMBER"
     - echo "PROJECT_VERSION=$PROJECT_VERSION" >> $CIRRUS_ENV
     - jfrog config add repox --artifactory-url "$ARTIFACTORY_URL" --access-token "$ARTIFACTORY_PRIVATE_ACCESS_TOKEN"
     - jfrog poetry-config --server-id-resolve repox --repo-resolve sonarsource-pypi
@@ -43,7 +43,7 @@ build_task:
   <<: *POETRY_TEMPLATE
   alias: build
   name: "Build"
-  build_script: .cirrus/regular_poetry_build_publish
+  build_script: regular_poetry_build_publish
 
 promote_task:
   depends_on:
@@ -56,4 +56,4 @@ promote_task:
     BURGR_PASSWORD: VAULT[development/kv/data/burgr data.cirrus_password]
     ARTIFACTS: :sonar_dummy_python_oss:tar.gz,:sonar_dummy_python_oss:whl:py3-none-any
   <<: *POETRY_TEMPLATE
-  promote_script: .cirrus/cirrus_promote
+  promote_script: cirrus_promote
