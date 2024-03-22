@@ -6,6 +6,7 @@ on:
   release:
     types:
       - published
+      - released
 
 env:
   PYTHONUNBUFFERED: 1
