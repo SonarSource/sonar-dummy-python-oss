@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "sonar_dummy_python_oss"
-version = "0.0.1"
+version = "0.1.0a"
 authors = [
   "Jayadeep Kinavoor Madam <jayadeep.kinavoormadam@sonarsource.com>",
 ]
