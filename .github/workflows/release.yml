@@ -11,7 +11,7 @@ jobs:
     permissions:
       id-token: write
       contents: write
-    uses: SonarSource/gh-action_release/.github/workflows/main.yaml@master
+    uses: SonarSource/gh-action_release/.github/workflows/main.yaml@chore/mm/BUILD-4795
     with:
       publishToPyPI: ${{ !github.event.release.prerelease }} # Only publish to PyPI for non-prerelease releases
       publishToTestPyPI: ${{ github.event.release.prerelease }}
