@@ -1,6 +1,5 @@
 name: Release
 
-# Trigger when publishing a new GitHub release
 on:
   release:
     types:
