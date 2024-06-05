@@ -10,7 +10,7 @@ jobs:
     permissions:
       id-token: write
       contents: write
-    uses: SonarSource/gh-action_release/.github/workflows/main.yaml@48a71cb252ad4a2e630db2ec1838389dc83efc19 # 5.5.0
+    uses: SonarSource/gh-action_release/.github/workflows/main.yaml@70a8c6ba6d6a99df272bbdf04b3d5990b12d6dff # 5.6.0
     with:
       publishToPyPI: ${{ !github.event.release.prerelease }} # Only publish to PyPI for non-prerelease releases
       publishToTestPyPI: ${{ github.event.release.prerelease }}
