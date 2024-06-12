@@ -15,3 +15,4 @@ jobs:
       publishToPyPI: ${{ !github.event.release.prerelease }} # Only publish to PyPI for non-prerelease releases
       publishToTestPyPI: ${{ github.event.release.prerelease }}
       skipPythonReleasabilityChecks: true
+      isDummyProject: true
