@@ -19,6 +19,6 @@ RUN cd /usr/local/bin \
 
 USER sonarsource
 
-RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN curl -sSL https://install.python-poetry.org | python3 - --version 1.8.4
 ENV PATH="/home/sonarsource/bin:${PATH}"
 ENV PATH="${PATH}:/home/sonarsource/.local/bin"
