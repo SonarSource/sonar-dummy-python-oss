@@ -5,6 +5,7 @@ USER root
 
 ARG SCANNER_VERSION=5.0.1.3006
 ARG PYTHON_VERSION=3.12.1
+ARG POETRY_VERSION=1.8.4
 
 # install required dependencies to build Python from source see: https://devguide.python.org/getting-started/setup-building/#install-dependencies
 RUN apt-get update && apt-get install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libsqlite3-dev libreadline-dev libffi-dev curl libbz2-dev
@@ -19,6 +20,6 @@ RUN cd /usr/local/bin \
 
 USER sonarsource
 
-RUN curl -sSL https://install.python-poetry.org | python3 - --version 1.8.4
+RUN curl -sSL https://install.python-poetry.org | python3 - --version ${POETRY_VERSION}
 ENV PATH="/home/sonarsource/bin:${PATH}"
 ENV PATH="${PATH}:/home/sonarsource/.local/bin"
