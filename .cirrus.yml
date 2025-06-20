@@ -38,12 +38,14 @@ poetry_cache_template: &POETRY_CACHE
     - jfrog poetry-config --server-id-resolve repox --repo-resolve sonarsource-pypi
     - jfrog poetry install --build-name="$CIRRUS_REPO_NAME" --build-number="$CI_BUILD_NUMBER"
 
+# TODO BUILD-8300 remove this task once migrated to GitHub workflow
 build_task:
   <<: *POETRY_TEMPLATE
   alias: build
   name: "Build"
   build_script: regular_poetry_build_publish
 
+# TODO BUILD-8300 remove this task once migrated to GitHub workflow
 promote_task:
   depends_on:
     - build
