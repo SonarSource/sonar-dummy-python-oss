@@ -1,0 +1,147 @@
+name: Build
+on:
+  push:
+    branches:
+      - master
+      - branch-*
+      - gh-readonly-queue/*
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+
+env:
+  DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+  ARTIFACTORY_URL: https://repox.jfrog.io/artifactory
+#  POETRY_VIRTUALENVS_PATH: ".cache/poetry/venvs"
+#  POETRY_CACHE_DIR: ".cache/poetry/pypoetry"
+
+jobs:
+  build:
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
+    runs-on: ubuntu-24.04-large
+    name: Build
+    permissions:
+      id-token: write
+      contents: write
+#    outputs:
+#      BUILD_NUMBER: ${{ steps.build-number.outputs.BUILD_NUMBER }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: jdx/mise-action@13abe502c30c1559a5c37dff303831bab82c9402 # v2.2.3
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Vault
+        id: secrets
+        uses: SonarSource/vault-action-wrapper@d6d745ffdbc82b040df839b903bc33b5592cd6b0 # 3.0.2
+        with:
+          secrets: |
+            development/artifactory/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | ARTIFACTORY_PRIVATE_ACCESS_TOKEN;
+            development/artifactory/token/{REPO_OWNER_NAME_DASH}-qa-deployer username | ARTIFACTORY_DEPLOY_USERNAME;
+            development/artifactory/token/{REPO_OWNER_NAME_DASH}-qa-deployer access_token | ARTIFACTORY_DEPLOY_ACCESS_TOKEN;
+            development/kv/data/develocity token | DEVELOCITY_TOKEN;
+      - name: Cache local Poetry cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ${{ github.workspace }}/.cache/poetry
+          key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
+          restore-keys: ${{ runner.os }}-poetry-
+      - uses: SonarSource/ci-common-scripts/actions/get-build-number@master # dogfood
+        id: build-number
+      - name: Build, Analyze and deploy
+        id: build
+        shell: bash
+        env:
+          DEPLOY_PULL_REQUEST: true
+#          SONAR_HOST_URL: ${{ fromJSON(steps.secrets.outputs.vault).SONAR_HOST_URL }}
+          ARTIFACTORY_PYPI_REPO: "sonarsource-pypi"
+          ARTIFACTORY_DEPLOY_REPO: "sonarsource-pypi-public-qa"
+          ARTIFACTORY_PRIVATE_ACCESS_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).ARTIFACTORY_PRIVATE_ACCESS_TOKEN }}
+          ARTIFACTORY_DEPLOY_USERNAME: ${{ fromJSON(steps.secrets.outputs.vault).ARTIFACTORY_DEPLOY_USERNAME }}
+          ARTIFACTORY_DEPLOY_ACCESS_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).ARTIFACTORY_DEPLOY_ACCESS_TOKEN }}
+        run: |
+          # source github-env BUILD
+          DEFAULT_BRANCH=${DEFAULT_BRANCH:=$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)}
+          export PROJECT=${GITHUB_REPOSITORY#*/}
+          echo "PROJECT: $PROJECT"
+          if [[ "$GITHUB_EVENT_NAME" = "pull_request" ]]; then
+            PULL_REQUEST=$(jq --raw-output .number "$GITHUB_EVENT_PATH")
+            PULL_REQUEST_SHA=$(jq --raw-output .pull_request.base.sha "$GITHUB_EVENT_PATH")
+          else
+            PULL_REQUEST=false
+          fi
+          echo "PULL_REQUEST: $PULL_REQUEST"
+          export DEFAULT_BRANCH PULL_REQUEST PULL_REQUEST_SHA
+
+          source set_poetry_build_version "$BUILD_NUMBER"
+          echo "PROJECT_VERSION=$PROJECT_VERSION" >> $GITHUB_ENV
+          jfrog config add repox --artifactory-url "$ARTIFACTORY_URL" --access-token "$ARTIFACTORY_PRIVATE_ACCESS_TOKEN"
+          jfrog poetry-config --server-id-resolve repox --repo-resolve "$ARTIFACTORY_PYPI_REPO"
+          jfrog poetry install --build-name="$PROJECT" --build-number="$BUILD_NUMBER"
+
+          regular_poetry_build_publish
+
+          # run scanner?
+          #if is_main_branch && ! is_pull_request; then
+          #  run_sonar_scanner \
+          #  -Dsonar.projectVersion="$CURRENT_VERSION"
+          #elif is_maintenance_branch && ! is_pull_request; then
+          #  run_sonar_scanner \
+          #  -Dsonar.branch.name="$GITHUB_REF_NAME"
+          #elif is_pull_request; then
+          #  run_sonar_scanner \
+          #  -Dsonar.analysis.prNumber="$PULL_REQUEST"
+          #elif is_long_lived_feature_branch && ! is_pull_request; then
+          #  run_sonar_scanner \
+          #  -Dsonar.branch.name="$GITHUB_REF_NAME"
+
+          # run_sonar_scanner
+      - name: 'Upload Artifact'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: event-payload
+          path: ${{ github.event_path }}
+
+  promote:
+    needs:
+      - build
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
+    runs-on: ubuntu-24.04-large
+    name: Promote
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: jdx/mise-action@13abe502c30c1559a5c37dff303831bab82c9402 # v2.2.3
+        with:
+          cache_save: false
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Restore local Poetry cache
+        uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ${{ github.workspace }}/.cache/poetry
+          key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
+          restore-keys: ${{ runner.os }}-poetry-
+      - name: Vault
+        id: secrets
+        uses: SonarSource/vault-action-wrapper@d6d745ffdbc82b040df839b903bc33b5592cd6b0 # 3.0.2
+        with:
+          secrets: |
+            development/artifactory/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | ARTIFACTORY_PRIVATE_ACCESS_TOKEN;
+            development/artifactory/token/{REPO_OWNER_NAME_DASH}-promoter access_token | ARTIFACTORY_PROMOTE_ACCESS_TOKEN;
+            development/github/token/{REPO_OWNER_NAME_DASH}-promotion token | GITHUB_TOKEN;
+      - uses: SonarSource/ci-common-scripts/actions/get-build-number@master # dogfood
+      - name: Promote artifacts
+        env:
+          ARTIFACTORY_PRIVATE_ACCESS_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).ARTIFACTORY_PRIVATE_ACCESS_TOKEN }}
+          ARTIFACTORY_PROMOTE_ACCESS_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).ARTIFACTORY_PROMOTE_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
+        run: |
+          ## TODO BUILD-8085 WORKAROUND cache issue
+          #export BUILD_NUMBER=${{ needs.build.outputs.BUILD_NUMBER }}
+          promote
