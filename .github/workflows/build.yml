@@ -27,7 +27,6 @@ jobs:
       - uses: SonarSource/ci-github-actions/build-poetry@master # dogfood
 
   promote:
-    if: false # TODO WIP BUILD-8099
     needs:
       - build
     concurrency:
@@ -44,10 +43,11 @@ jobs:
         with:
           cache_save: false
       - name: Restore local Poetry cache
-        uses: SonarSource/ci-github-actions/cache@cba424250d55b302fefe0ec32dfc483fc7732738
+        uses: SonarSource/ci-github-actions/cache@feat/mmatuszny/BUILD-8451
         with:
           path: ${{ github.workspace }}/.cache/pypoetry
           key: poetry-${{ runner.os }}-${{ hashFiles('poetry.lock') }}
           restore-keys: poetry-${{ runner.os }}-
       - uses: SonarSource/ci-github-actions/get-build-number@feat/jcarsique/BUILD-80099-promotePoetry # TODO WIP BUILD-8099
       - uses: SonarSource/ci-github-actions/promote-poetry@feat/jcarsique/BUILD-80099-promotePoetry # TODO WIP BUILD-8099
+
