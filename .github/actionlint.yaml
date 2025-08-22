@@ -1,4 +1,4 @@
 # Configuration for https://github.com/rhysd/actionlint run by pre-commit
 self-hosted-runner:
   labels:
-    - ubuntu-24.04-large
+    - github-ubuntu-latest-s
