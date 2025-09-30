@@ -4,6 +4,9 @@ on:
     # Run the workflow every day at 04:00 UTC
     - cron: '0 4 * * *'
   workflow_dispatch:
+  push:
+    branches:
+      - feat/jd/BUILD-9204-unified-dogfooding-test
 
 jobs:
   build:
@@ -19,7 +22,7 @@ jobs:
           run-shadow-scans: true
 
       - name: Run IRIS Analysis
-        uses: SonarSource/unified-dogfooding-actions/run-iris@v1
+        uses: SonarSource/unified-dogfooding-actions/run-iris@task/dam/simplify-action
         with:
           primary_project_key: "SonarSource_sonar-dummy-python-oss"
           primary_platform: "SQC-EU"
