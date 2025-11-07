@@ -18,12 +18,14 @@ jobs:
     permissions:
       id-token: write
       contents: write
+      attestations: write
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: SonarSource/ci-github-actions/build-poetry@master # dogfood
         with:
           sonar-platform: sqc-eu
           deploy-pull-request: true
+          provenance: 'true'
 
   promote:
     needs:
