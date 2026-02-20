@@ -21,7 +21,7 @@ jobs:
       attestations: write
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: SonarSource/ci-github-actions/build-poetry@e50fb05 # dogfood
+      - uses: SonarSource/ci-github-actions/build-poetry@BUILD-9431-group-action-logs-readability # dogfood
         with:
           sonar-platform: sqc-eu
           deploy-pull-request: true
@@ -39,6 +39,6 @@ jobs:
       id-token: write
       contents: write
     steps:
-      - uses: SonarSource/ci-github-actions/promote@e50fb05 # dogfood
+      - uses: SonarSource/ci-github-actions/promote@BUILD-9431-group-action-logs-readability # dogfood
         with:
           promote-pull-request: true
