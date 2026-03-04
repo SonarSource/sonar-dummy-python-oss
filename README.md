@@ -11,3 +11,5 @@ To verify an artifact:
 ```bash
 gh attestation verify <artifact-file> --repo SonarSource/sonar-dummy-python-oss
 ```
+
+TEST BUILD-10590
