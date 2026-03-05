@@ -15,6 +15,6 @@ jobs:
     permissions:
       actions: write
       id-token: write
-    uses: SonarSource/ci-github-actions/.github/workflows/re-trigger-approvals.yml@feat/jcarsique/BUILD-10590-verifiedApprovals
+    uses: SonarSource/ci-github-actions/.github/workflows/re-trigger-approvals.yml@master # dogfood
     with:
       head_sha: ${{ github.event.pull_request.head.sha || inputs.head_sha }}
