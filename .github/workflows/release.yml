@@ -7,6 +7,11 @@ on:
         description: 'Release version'
         required: true
         type: string
+      publishToTestPyPI:
+        description: 'Publish to Test PyPI instead of PyPI'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   release:
@@ -16,6 +21,7 @@ jobs:
     uses: SonarSource/gh-action_release/.github/workflows/main.yaml@master # dogfood
     with:
       version: ${{ inputs.version }}
-      publishToPyPI: true
+      publishToPyPI: ${{ !inputs.publishToTestPyPI }}
+      publishToTestPyPI: ${{ inputs.publishToTestPyPI }}
       skipPythonReleasabilityChecks: true
       isDummyProject: true
