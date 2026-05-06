@@ -1,17 +1,21 @@
 name: Release
+# yamllint disable-line rule:truthy
 on:
-  release:
-    types:
-      - published
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+        type: string
 
 jobs:
   release:
     permissions:
       id-token: write
       contents: write
-    uses: SonarSource/gh-action_release/.github/workflows/main.yaml@v6
+    uses: SonarSource/gh-action_release/.github/workflows/main.yaml@master # dogfood
     with:
-      publishToPyPI: ${{ !github.event.release.prerelease }} # Only publish to PyPI for non-prerelease releases
-      publishToTestPyPI: ${{ github.event.release.prerelease }}
+      version: ${{ inputs.version }}
+      publishToPyPI: true
       skipPythonReleasabilityChecks: true
       isDummyProject: true
