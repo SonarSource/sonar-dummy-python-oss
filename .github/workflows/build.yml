@@ -51,3 +51,5 @@ jobs:
       - uses: SonarSource/ci-github-actions/promote@feat/jcarsique/BUILD-11521-selfHostedRepox # dogfood
         with:
           promote-pull-request: true
+              with:
+                repox-url: https://repox.dev.sonar.build
