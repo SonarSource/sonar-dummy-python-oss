@@ -39,8 +39,9 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
-    runs-on: github-ubuntu-latest-s
-    name: Promote
+    runs-on:
+      group: sonar-dev
+      labels: github-ubuntu-latest-s    name: Promote
     permissions:
       id-token: write
       contents: write
