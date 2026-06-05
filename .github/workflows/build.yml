@@ -41,7 +41,8 @@ jobs:
       cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch }}
     runs-on:
       group: sonar-dev
-      labels: github-ubuntu-latest-s    name: Promote
+      labels: github-ubuntu-latest-s
+    name: Promote
     permissions:
       id-token: write
       contents: write
