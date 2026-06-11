@@ -9,24 +9,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  verify-config-poetry:
-    runs-on: github-ubuntu-latest-s
-    name: Verify config-poetry
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
-        with:
-          egress-policy: audit
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
-        with:
-          version: 2026.5.9
-      - uses: SonarSource/ci-github-actions/config-poetry@feat/hnasr/BUILD-8956-createConfigPoetry # dogfood
-      - name: Verify Poetry resolves dependencies via Repox
-        run: poetry install && poetry build
-
   build:
     concurrency:
       group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -42,6 +24,10 @@ jobs:
         with:
           egress-policy: audit
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          version: 2026.5.9
+      - uses: SonarSource/ci-github-actions/config-poetry@feat/hnasr/BUILD-8956-createConfigPoetry # dogfood
       - uses: SonarSource/ci-github-actions/build-poetry@feat/hnasr/BUILD-8956-createConfigPoetry # dogfood
         with:
           sonar-platform: sqc-eu
