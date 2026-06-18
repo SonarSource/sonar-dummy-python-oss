@@ -21,6 +21,8 @@ jobs:
       - name: Verify Poetry resolves dependencies via Repox
         shell: bash -leo pipefail {0}
         run: |
+          cat ~/.bashrc
+          which poetry
           poetry install && poetry build
 
   build:
