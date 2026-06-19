@@ -24,8 +24,7 @@ jobs:
       - name: Verify Poetry resolves dependencies via Repox
         shell: bash -leo pipefail {0}
         run: |
-          cat ~/.bashrc
-          which poetry
+          echo "127.0.0.1 pypi.org" >> /etc/hosts
           poetry install && poetry build
 
   build:
