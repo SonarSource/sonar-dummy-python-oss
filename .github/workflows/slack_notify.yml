@@ -16,8 +16,6 @@ jobs:
         with:
           egress-policy: audit
       - uses: SonarSource/ci-github-actions/config-pip@3c6565f5a65282d333ab60c8a0fa733c09e613d3 # 1.8.7
-        with:
-          disable-caching: true
       - name: Send Slack Notification
         env:
           GITHUB_TOKEN: ${{ github.token }}
