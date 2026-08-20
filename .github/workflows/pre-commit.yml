@@ -20,6 +20,7 @@ jobs:
           index_url="$(python3 -c 'import configparser, pathlib; c = configparser.ConfigParser(); c.read(pathlib.Path.home() / ".pip" / "pip.conf"); print(c["global"]["index-url"])')"
           echo "::add-mask::${index_url}"
           echo "PIP_INDEX_URL=${index_url}" >> "$GITHUB_ENV"
+          echo "VIRTUALENV_INDEX_URL=${index_url}" >> "$GITHUB_ENV"
           echo "PIP_TRUSTED_HOST=repox.jfrog.io" >> "$GITHUB_ENV"
       - uses: SonarSource/ci-github-actions/config-npm@master # dogfood
       - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
