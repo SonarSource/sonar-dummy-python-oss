@@ -15,7 +15,7 @@ jobs:
       - uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
         with:
           egress-policy: audit
-      - uses: SonarSource/ci-github-actions/config-pip@3c6565f5a65282d333ab60c8a0fa733c09e613d3 # 1.8.7
+      - uses: SonarSource/ci-github-actions/config-pip@v1
       - name: Send Slack Notification
         env:
           GITHUB_TOKEN: ${{ github.token }}
