@@ -22,6 +22,10 @@ jobs:
           {
             echo "PIP_INDEX_URL=${index_url}"
             echo "VIRTUALENV_INDEX_URL=${index_url}"
+            echo "VIRTUALENV_PIP=embed"
+            echo "VIRTUALENV_SETUPTOOLS=embed"
+            echo "VIRTUALENV_WHEEL=embed"
+            echo "VIRTUALENV_DOWNLOAD=false"
             echo "PIP_TRUSTED_HOST=repox.jfrog.io"
           } >> "$GITHUB_ENV"
       - uses: SonarSource/ci-github-actions/config-npm@master # dogfood
