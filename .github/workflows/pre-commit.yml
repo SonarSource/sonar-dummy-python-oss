@@ -6,10 +6,29 @@ jobs:
   pre-commit:
     name: "pre-commit"
     runs-on: github-ubuntu-latest-s
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
         with:
           egress-policy: audit
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: SonarSource/ci-github-actions/config-pip@v1
+      - name: Export pip index for isolated hook venvs
+        run: |
+          index_url="$(python3 -c 'import configparser, pathlib; c = configparser.ConfigParser(); c.read(pathlib.Path.home() / ".pip" / "pip.conf"); print(c["global"]["index-url"])')"
+          echo "::add-mask::${index_url}"
+          {
+            echo "PIP_INDEX_URL=${index_url}"
+            echo "VIRTUALENV_INDEX_URL=${index_url}"
+            echo "VIRTUALENV_PIP=embed"
+            echo "VIRTUALENV_SETUPTOOLS=embed"
+            echo "VIRTUALENV_WHEEL=embed"
+            echo "VIRTUALENV_DOWNLOAD=false"
+            echo "PIP_TRUSTED_HOST=repox.jfrog.io"
+          } >> "$GITHUB_ENV"
+      - uses: SonarSource/ci-github-actions/config-npm@master # dogfood
       - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
         with:
           version: 2025.12.13
