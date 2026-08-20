@@ -6,10 +6,18 @@ jobs:
   pre-commit:
     name: "pre-commit"
     runs-on: github-ubuntu-latest-s
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
         with:
           egress-policy: audit
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: SonarSource/ci-github-actions/config-pip@3c6565f5a65282d333ab60c8a0fa733c09e613d3 # 1.8.7
+        with:
+          disable-caching: true
+      - uses: SonarSource/ci-github-actions/config-npm@master # dogfood
       - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
         with:
           version: 2025.12.13
