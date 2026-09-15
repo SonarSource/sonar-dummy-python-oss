@@ -17,11 +17,11 @@ jobs:
     if: |
       github.event.pull_request.head.repo.full_name == github.repository
     steps:
-      - uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      - uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
         with:
           egress-policy: audit
       - id: secrets
-        uses: SonarSource/vault-action-wrapper@881045d830534a70ec3c7c275fa3714412c8ff6e # 3.6.1
+        uses: SonarSource/vault-action-wrapper@a7fa5fd4a4e4e0f2593f6137c0812cac196cf4ce # 3.7.0
         with:
           secrets: |
             development/kv/data/jira user | JIRA_USER;
