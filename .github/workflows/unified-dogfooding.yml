@@ -4,6 +4,7 @@ on:
     # Run the workflow every day at 04:00 UTC
     - cron: '0 4 * * *'
   workflow_dispatch:
+  pull_request: # SC-60373 WIF pilot only, remove before merge
 
 jobs:
   build:
@@ -17,7 +18,7 @@ jobs:
         with:
           egress-policy: audit
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: SonarSource/ci-github-actions/build-poetry@master # dogfood
+      - uses: SonarSource/ci-github-actions/build-poetry@feature/ap/SC-60373-wif-sonarqube-cloud-scans # SC-60373 WIF pilot, revert to master
         with:
           run-shadow-scans: true
 
