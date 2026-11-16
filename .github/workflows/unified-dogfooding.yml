@@ -18,7 +18,7 @@ jobs:
         with:
           egress-policy: audit
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: SonarSource/ci-github-actions/build-poetry@feature/ap/SC-60373-wif-sonarqube-cloud-scans # SC-60373 WIF pilot, revert to master
+      - uses: SonarSource/ci-github-actions/build-poetry@f92738b60fafe698bd3675185413313aed66a74e # SC-60373 / #367 pilot only; revert before merge
         with:
           run-shadow-scans: true
 
